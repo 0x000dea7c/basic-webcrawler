@@ -1,0 +1,96 @@
+* basic-webcrawler
+
+The goal of this mini project is to learn the basics of multi-threading.
+
+* Information
+
+- I'm not allowed to go outside the domains that I specified in the `seeds` variable.
+- Respect robots.txt file.
+- Use delays between requests to not be annoying. Default value of 1 second between requests, but prefer delay specified in robots.txt.
+- Use persistence to avoid reprocessing URLs if the program is interrupted.
+
+* TASKS
+
+this is the task list because without it i lose all motivation and feel depressed:
+
+** DONE add clang-for mat using GNU coding style
+** DONE fix CMakeLists.txt to add compile-commands.json file
+** DONE make sure clangd is picking things up correctly
+** DONE create config file to define initial seed urls
+** DONE handle http responses, status codes and redirects
+** DONE before doing anything, perform requests to initial domains and grab their robots.txt, parse it
+** DONE parse HTML using a lib or something, extract hyperlinks
+** DONE when parsing links, need to get rid of the last "/" to differentiate links
+** DONE create crawler class, inject dependencies and unit test functions
+** DONE when extracting links, do not process links that start with '#'.
+** DONE create a queue to store URLs to be crawled, use the bfs algorithm; the queue should not contain dups
+** DONE remember bfs needs a container to see if you already visited a URL or not
+** DONE links that start with '/' are within the same domain, construct them
+
+it's partially done, need to do this also while crawling
+
+** DONE test that shit
+** DONE now, before crawling to an specific URL, check if it's allowed based on its robots.txt
+** DONE normalise extracted URLs (resolve relative URLs to absolute) i think it's done
+think about subdomains too, like en.wikipedia.org and wikipedia.org... i don't think i need to normalise those, i mean, they're different pages in the end? maybe not, im stupid so... later
+
+** DONE after normalising them, make sure they are still allowed
+** NO i think i need to split the info of a url into protocol + domain at least, because links that start with // require them
+** DONE extract page title from each web you visit (just to store something, idk)
+** DONE introduce delays between requests (same domain)
+maybe in robots.txt there's something about this? or just add it to the config file
+** DONE handle http errors gracefully
+for now it's printing to stderr
+** DONE retry requests, with limits
+** DONE add depth limit
+** DONE debugger: step through line by line to notice mistakes/redudant stuff
+** DONE improve http parsing
+visited URL https://www.google.com/products, page title: Google Shopping - Shop Online, Compare Prices & Where to Buy
+couldn't perform http request to URL products/robots.txt because: Could not resolve hostname
+couldn't perform http request to URL products because: Could not resolve hostname
+visited URL https://www.blog.google, page title: The Keyword | Google Product and Technology News and Stories
+couldn't perform http request to URL stories/robots.txt because: Could not resolve hostname
+couldn't perform http request to URL stories because: Could not resolve hostname
+
+visited URL https://safety.google/principles?hl=en_US, page title: Privacy Principles - Google Safety Center
+couldn't perform http request to URL privacy?hl=en-US/robots.txt because: Could not resolve hostname
+couldn't perform http request to URL privacy?hl=en-US because: Could not resolve hostname
+couldn't perform http request to URL terms?hl=en-US/robots.txt because: Could not resolve hostname
+couldn't perform http request to URL terms?hl=en-US because: Could not resolve hostname
+couldn't perform http request to URL faq?hl=en-US/robots.txt because: Could not resolve hostname
+couldn't perform http request to URL faq?hl=en-US because: Could not resolve hostname
+couldn't perform http request to URL technologies?hl=en-US/robots.txt because: Could not resolve hostname
+couldn't perform http request to URL technologies?hl=en-US because: Could not resolve hostname
+
+visited URL https://about.google, page title: Google - Sobre nosotros
+visited URL https://www.google.com, page title: Google
+couldn't perform http request to URL technologies/product-privacy?hl=en-US/robots.txt because: Could not resolve hostname
+couldn't perform http request to URL technologies/product-privacy?hl=en-US because: Could not resolve hostname
+url: https://policies.google.com/robots.txt not found
+
+visited URL https://support.google.com/translate/answer/6142478?hl=en&ref_topic=7011659, page title: Translate written words - iPhone & iPad - Google Translate Help
+couldn't perform http request to URL about:invalid#zjslayoutz because: URL using bad/illegal format or missing URL
+
+
+
+** DONE visited urls are not working correctly i think
+
+in logs i see repeated urls being processed, i don't know if it has to do with not normalised links or something
+stupid mistake
+
+** DONE ignore pdfs
+** DONE ignore /login/ pages because you can't login anyways, there's nothing to see there
+** TODO can i do something regarding mem usage? for example, if you hit > 1gb usage, stop, or allocate upfront
+** TODO profile binary and see where you can improve
+** DONE instead of using set, consider using unordered_set. you don't need ordering, only lookups.
+note: make sure there isn't a significant number of collisions when changing to unordered_set
+** TODO what about using a trie data structure for doing prefix search? is it even worth?
+** TODO handle signals
+** TODO refactor stuff noticed in comments
+** TODO add multi-threading, since that's what this project was for, look for optimisation opportunities
+don't forget to analyse this part and store the information somewhere because you will need it
+** TODO do at least one integration test with a known URL to ensure that something's working lol
+** TODO write better readme, with how-to compile, run, etc
+** TODO change every initialisation to use curly brackets instead
+** TODO store info in a text file
+** IDEA Implement persistence to save the state of visited URLs between sessions.

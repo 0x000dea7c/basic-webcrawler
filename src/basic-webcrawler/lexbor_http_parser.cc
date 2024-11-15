@@ -36,7 +36,7 @@ lexbor_http_parser::parse (std::string const &url, std::string const &contents)
 
   {
     // get the title
-    size_t title_len = 0;
+    size_t title_len{0};
     auto *lxb_title = lxb_html_document_title (_document, &title_len);
     if (lxb_title)
       {
@@ -56,80 +56,96 @@ void
 lexbor_http_parser::extract (lxb_dom_node_t *node, std::string const &url, std::string const &domain,
                              std::string const &protocol)
 {
-  // REVIEW: refactor this crap
   while (node)
     {
       if (node->type == LXB_DOM_NODE_TYPE_ELEMENT)
         {
-          auto *element = lxb_dom_interface_element (node);
-          auto const *tag_name = lxb_dom_element_qualified_name (element, nullptr);
-
-          if (std::strncmp ((char const *) tag_name, "a", 1) == 0)
-            {
-              auto *attribute = lxb_dom_element_attr_by_name (element, (lxb_char_t const *) "href", 4);
-
-              if (attribute)
-                {
-                  auto const *link_value = lxb_dom_attr_value (attribute, nullptr);
-
-                  if (link_value)
-                    {
-                      auto link_str = std::string ((char const *) link_value);
-
-                      if (!link_str.empty () && link_str.find ("mailto:"s) == std::string::npos
-                          && link_str.find ("javascript:"s) == std::string::npos
-                          && link_str.find (".pdf"s) == std::string::npos
-                          && link_str.find ("/login"s) == std::string::npos
-                          && link_str.find ("/auth"s) == std::string::npos)
-                        {
-                          if (link_str.front () != '#') // skip references to the same page
-                            {
-                              if (link_str.size () > 2 && link_str[0] == '/' && link_str[1] == '/')
-                                {
-                                  // NOTE: protocol relative url, need to preserve http or https from current
-                                  // domain
-                                  link_str = protocol + ":" + link_str;
-                                }
-                              else if (link_str.size () > 2 && link_str[0] == '.'
-                                       && link_str[1] == '/') // REVIEW: is this correct?
-                                {
-                                  link_str = domain + link_str.substr (1);
-                                }
-                              else if (link_str[0] == '/')
-                                {
-                                  // NOTE: absolute path relative url, means current domain + path
-                                  link_str = domain + link_str;
-                                }
-                              else if (link_str.find ("http"s) == std::string::npos)
-                                {
-                                  // links like:
-                                  // terms/service-specific?gl=ES&hl=en&sa=X&ved=2ahUKEwjL3r6frdyJAxUHZkECHYUpAGAQnfsGegQIABAH
-                                  // that lack of the domain
-                                  link_str = domain + '/' + link_str;
-                                }
-
-                              // get rid of fragment identifiers because they're essentially the same page
-                              auto fragment_id_pos = link_str.find ('#');
-                              if (fragment_id_pos != std::string::npos)
-                                {
-                                  link_str = link_str.substr (0, fragment_id_pos);
-                                }
-
-                              if (link_str.back () == '/')
-                                {
-                                  // no need to store the last /
-                                  link_str.pop_back ();
-                                }
-
-                              _metadata[url]->_links.emplace (link_str);
-                            }
-                        }
-                    }
-                }
-            }
+          process_node (node, url, domain, protocol);
         }
 
       extract (node->first_child, url, domain, protocol);
+
       node = node->next;
     }
+}
+
+void
+lexbor_http_parser::process_node (lxb_dom_node_t *node, std::string const &url, std::string const &domain,
+                                  std::string const &protocol)
+{
+  auto *element = lxb_dom_interface_element (node);
+  auto const *tag_name = lxb_dom_element_qualified_name (element, nullptr);
+
+  if (std::strncmp ((char const *) tag_name, "a", 1) != 0)
+    {
+      // if the element isn't a link, no need to keep going
+      return;
+    }
+
+  auto *attribute = lxb_dom_element_attr_by_name (element, (lxb_char_t const *) "href", 4);
+
+  if (!attribute)
+    {
+      return;
+    }
+
+  auto const *link_value = lxb_dom_attr_value (attribute, nullptr);
+
+  if (!link_value)
+    {
+      return;
+    }
+
+  process_link (std::string ((char const *) link_value), url, domain, protocol);
+}
+
+void
+lexbor_http_parser::process_link (std::string link, std::string const &url, std::string const &domain,
+                                  std::string const &protocol)
+{
+  // if the link is empty or contains crap (unwanted material), skip it
+  if (link.empty () || link.front () == '#' || link.find ("mailto:"s) != std::string::npos
+      || link.find ("javascript:"s) != std::string::npos || link.find (".pdf"s) != std::string::npos
+      || link.find ("/login"s) != std::string::npos || link.find ("/auth"s) != std::string::npos
+      || link.find (".png"s) != std::string::npos || link.find (".jpg"s) != std::string::npos)
+    {
+      return;
+    }
+
+  // normalise the link
+  if (link.compare (0, 2, "//") == 0)
+    {
+      // protocol-relative URL (e.g., //example.com)
+      link = protocol + ":" + link;
+    }
+  else if (link.compare (0, 2, "./") == 0)
+    {
+      // relative URL starting with './' (e.g., ./path/page)
+      link = domain + link.substr (1);
+    }
+  else if (link[0] == '/')
+    {
+      // absolute path relative URL (e.g., /path/page)
+      link = domain + link;
+    }
+  else if (link.find ("http") != 0)
+    {
+      // relative URL without leading slash (e.g., path/page)
+      link = domain + "/" + link;
+    }
+
+  // remove fragment identifiers (anything after '#')
+  auto fragment_pos = link.find ('#');
+  if (fragment_pos != std::string::npos)
+    {
+      link.erase (fragment_pos);
+    }
+
+  // remove trailing slash unless it's the root URL
+  if (link.length () > domain.length () + 1 && link.back () == '/')
+    {
+      link.pop_back ();
+    }
+
+  _metadata[url]->_links.emplace (std::move (link));
 }

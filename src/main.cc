@@ -24,15 +24,16 @@ main ()
 {
   init_app ();
 
-  std::unique_ptr<http_client> httpcli{std::make_unique<curl_http_client> ()};
+  std::unique_ptr<http_client> http_client{std::make_unique<curl_http_client> ()};
 
-  std::unique_ptr<http_parser> httppar{std::make_unique<lexbor_http_parser> ()};
+  std::unique_ptr<http_parser> http_parser{std::make_unique<lexbor_http_parser> ()};
 
   std::vector<std::string> const seeds{SEED_URL_1, SEED_URL_2, SEED_URL_3};
 
   robots_parser robots_parser (DEFAULT_REQUEST_DELAY);
 
-  crawler c (std::move (httpcli), std::move (httppar), std::move (seeds), robots_parser, DEFAULT_DEPTH_LIMIT);
+  crawler c (std::move (http_client), std::move (http_parser), std::move (seeds), robots_parser, DEFAULT_DEPTH_LIMIT,
+             METADATA_FILENAME);
 
   c.run ();
 

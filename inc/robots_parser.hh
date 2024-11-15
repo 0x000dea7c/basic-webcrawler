@@ -2,7 +2,7 @@
 
 #include <string>
 #include <set>
-#include <map>
+#include <unordered_map>
 #include <optional>
 
 class robots_parser final
@@ -19,7 +19,7 @@ public:
 
 private:
   std::set<std::string> _disallowed_pages;
-  std::map<std::string, int> _domains_delay;
+  std::unordered_map<std::string, int> _domains_delay;
 
   int _default_delay;
 };

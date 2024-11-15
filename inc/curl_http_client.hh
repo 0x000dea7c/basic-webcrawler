@@ -11,6 +11,7 @@ public:
 
   curl_http_client (curl_http_client &) = delete;
   curl_http_client (curl_http_client &&) = delete;
+
   bool operator= (curl_http_client const &) = delete;
 
   std::optional<std::string> get (std::string const &url) override;

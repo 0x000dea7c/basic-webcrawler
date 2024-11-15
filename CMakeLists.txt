@@ -12,8 +12,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Winline -Wunin
     -Woverloaded-virtual -Wformat -Wfloat-equal -Weffc++ -Wstrict-overflow=5 -fno-rtti")
 
 # Debug, Release compiler
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address,leak,undefined -ggdb")
-set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -g")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O0 -fsanitize=address,leak,undefined -ggdb -pg")
+set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -O3 -g -flto")
 
 # Debug, Release, linker
 set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lcurl")
@@ -25,6 +25,7 @@ set(SEED_URL_2 "https://www.fsme.es")
 set(SEED_URL_3 "http://bettermotherfuckingwebsite.com/")
 set(DEFAULT_REQUEST_DELAY 1)            # In seconds!
 set(DEFAULT_DEPTH_LIMIT 2)
+set(METADATA_FILENAME "crawler_output.txt")
 
 configure_file(
   "${PROJECT_SOURCE_DIR}/inc/config.h.in"

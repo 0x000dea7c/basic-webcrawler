@@ -7,10 +7,25 @@
 using namespace std::string_literals;
 
 crawler::crawler (std::unique_ptr<http_client> http_client, std::unique_ptr<http_parser> http_parser,
-                  std::vector<std::string> const &seeds, robots_parser &robots_parser, size_t depth_limit)
-  : _pages{}, _seeds{std::move (seeds)}, _http_client{std::move (http_client)}, _http_parser{std::move (http_parser)},
-    _robots_parser{robots_parser}, _depth_limit{depth_limit}
-{}
+                  std::vector<std::string> const &seeds, robots_parser &robots_parser, size_t depth_limit,
+                  std::string metadata_filename)
+  : _pages{}, _seeds{std::move (seeds)}, _metadata_filename{metadata_filename}, _metadata_file{},
+    _http_client{std::move (http_client)}, _http_parser{std::move (http_parser)}, _robots_parser{robots_parser},
+    _depth_limit{depth_limit}
+{
+  assert (!metadata_filename.empty ());
+
+  _metadata_file.open (_metadata_filename);
+
+  if (!_metadata_file)
+    {
+      throw std::runtime_error ("couldn't open file to store crawler's output.\n");
+    }
+
+  // REVIEW: trying
+  std::vector<char> buff (8192);
+  _metadata_file.rdbuf ()->pubsetbuf (buff.data (), (long) buff.size ());
+}
 
 crawler::~crawler () {}
 
@@ -74,7 +89,7 @@ crawler::run ()
 
       auto *link_metadata = _http_parser->get_url_metadata (link);
 
-      std::cout << "visited URL " << link << ", page title: " << link_metadata->_title << '\n';
+      process_page_metadata (link, link_metadata->_title);
 
       auto links = link_metadata->_links;
 
@@ -122,4 +137,11 @@ crawler::domain_was_visited (std::string const &domain, std::unordered_set<std::
     }
 
   return best_match.empty () ? false : true;
+}
+
+void
+crawler::process_page_metadata (std::string const &link, std::string const &title)
+{
+  // very simple stuff here, just write link + page title
+  _metadata_file << "Link: " << link << ", title: " << title << '\n';
 }

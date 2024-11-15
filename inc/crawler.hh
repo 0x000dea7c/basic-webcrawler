@@ -6,6 +6,7 @@
 #include <queue>
 #include <vector>
 #include <thread>
+#include <fstream>
 #include "robots_parser.hh"
 #include <unordered_set>
 
@@ -13,7 +14,8 @@ class crawler final
 {
 public:
   crawler (std::unique_ptr<http_client> http_client, std::unique_ptr<http_parser> http_parser,
-           std::vector<std::string> const &seeds, robots_parser &robots_parser, size_t depth_limit);
+           std::vector<std::string> const &seeds, robots_parser &robots_parser, size_t depth_limit,
+           std::string metadata_filename);
   ~crawler ();
 
   crawler (crawler &) = delete;
@@ -41,8 +43,12 @@ private:
 
   bool domain_was_visited (std::string const &domain, std::unordered_set<std::string> &visited) const;
 
+  void process_page_metadata (std::string const &link, std::string const &title);
+
   std::queue<std::pair<std::string, size_t>> _pages;
   std::vector<std::string> const _seeds;
+  std::string _metadata_filename;
+  std::ofstream _metadata_file;
   std::unique_ptr<http_client> _http_client;
   std::unique_ptr<http_parser> _http_parser;
   robots_parser &_robots_parser;

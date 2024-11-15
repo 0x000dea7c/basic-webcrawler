@@ -30,6 +30,11 @@ private:
 
   void extract (lxb_dom_node_t *node, std::string const &url, std::string const &domain, std::string const &protocol);
 
+  void process_node (lxb_dom_node_t *node, std::string const &url, std::string const &domain,
+                     std::string const &protocol);
+
+  void process_link (std::string link, std::string const &url, std::string const &domain, std::string const &protocol);
+
   std::unordered_map<std::string, std::unique_ptr<url_metadata>> _metadata;
   lxb_html_document_t *_document;
 };

@@ -2,7 +2,8 @@
 
 #include "http_parser.hh"
 #include <lexbor/html/html.h>
-#include <unordered_set>
+#include <unordered_map>
+#include <memory>
 #include <string>
 
 class lexbor_http_parser final : public http_parser
@@ -16,9 +17,9 @@ public:
 
   lexbor_http_parser &operator= (lexbor_http_parser &) = delete;
 
-  std::unordered_set<std::string> extract_links (std::string const &contents, std::string const &domain) override;
+  void parse (std::string const &url, std::string const &contents) override;
 
-  std::string get_page_title (std::string const &contents) override;
+  url_metadata *get_url_metadata (std::string const &url) const override { return _metadata.at (url).get (); }
 
 private:
   std::string get_protocol (std::string const &domain) const
@@ -27,8 +28,8 @@ private:
     return domain.substr (0, pos);
   }
 
-  void extract (lxb_dom_node_t *node, std::unordered_set<std::string> &links, std::string const &domain,
-                std::string const &protocol);
+  void extract (lxb_dom_node_t *node, std::string const &url, std::string const &domain, std::string const &protocol);
 
+  std::unordered_map<std::string, std::unique_ptr<url_metadata>> _metadata;
   lxb_html_document_t *_document;
 };

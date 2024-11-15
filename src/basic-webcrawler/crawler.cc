@@ -2,6 +2,7 @@
 #include "robots_parser.hh"
 #include <cassert>
 #include <iostream>
+#include "common.hh"
 
 using namespace std::string_literals;
 
@@ -12,15 +13,6 @@ crawler::crawler (std::unique_ptr<http_client> http_client, std::unique_ptr<http
 {}
 
 crawler::~crawler () {}
-
-std::string
-crawler::extract_domain (std::string const &url) const
-{
-  auto first_dot_pos = url.find ('.');
-  auto second_dot_pos = url.find ('.', first_dot_pos);
-  auto slash_pos = url.find ('/', second_dot_pos);
-  return url.substr (0, slash_pos);
-}
 
 void
 crawler::process_robots_file (std::string const &domain)
@@ -47,14 +39,18 @@ crawler::run ()
 
       _pages.pop ();
 
+      if (visited.count (link) > 0)
+        {
+          continue;
+        }
+
       if (depth > _depth_limit)
         {
           continue;
         }
 
-      auto domain = extract_domain (link);
+      auto domain = get_domain (link);
 
-      // TODO: do prefix-search, it's the same as path_is_allowed, almost, refactor this shit
       if (!domain_was_visited (domain, visited))
         {
           process_robots_file (domain);
@@ -74,11 +70,13 @@ crawler::run ()
           continue;
         }
 
-      // NOTE: here is where i can get the information needed, in this case i'll just get the page title
-      // and url and print it to stdout.
-      std::cout << "visited URL " << link << ", page title: " << _http_parser->get_page_title (*page_contents) << '\n';
+      _http_parser->parse (link, *page_contents);
 
-      auto links = _http_parser->extract_links (*page_contents, domain);
+      auto *link_metadata = _http_parser->get_url_metadata (link);
+
+      std::cout << "visited URL " << link << ", page title: " << link_metadata->_title << '\n';
+
+      auto links = link_metadata->_links;
 
       for (auto const &new_link : links)
         {

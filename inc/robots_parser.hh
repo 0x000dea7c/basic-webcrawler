@@ -9,7 +9,7 @@ class robots_parser final
 {
 public:
   robots_parser (int default_delay);
-  ~robots_parser () = default;
+  ~robots_parser ();
 
   void parse (std::string const &domain, std::optional<std::string> const &robots_contents);
 

@@ -7,6 +7,8 @@ using namespace std::string_literals;
 robots_parser::robots_parser (int default_delay) : _disallowed_pages{}, _domains_delay{}, _default_delay{default_delay}
 {}
 
+robots_parser::~robots_parser () {}
+
 void
 robots_parser::parse (std::string const &domain, std::optional<std::string> const &robots_contents)
 {

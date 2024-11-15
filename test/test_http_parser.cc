@@ -39,16 +39,17 @@ test_links_are_normalised (std::unordered_set<std::string> &links)
 }
 
 static void
-test_page_title (std::unique_ptr<http_parser> &parser, std::string const &contents)
+test_page_title (std::unique_ptr<http_parser> &parser, std::string const &url)
 {
   assert (
-    parser->get_page_title (contents)
+    parser->get_url_metadata (url)->_title
     == "Free software is a matter of liberty, not price — Free Software Foundation — Working together for free software"s);
 }
 
 int
 main ()
 {
+  std::string const test_url{"https://www.fsf.org"s};
   std::unique_ptr<http_parser> parser{std::make_unique<lexbor_http_parser> ()};
 
   std::ifstream file ("test.html"s);
@@ -63,11 +64,13 @@ main ()
   file_contents << file.rdbuf ();
   auto file_contents_str = file_contents.str ();
 
-  auto links = parser->extract_links (file_contents_str, "https://www.fsf.org"s);
+  parser->parse (test_url, file_contents_str);
+
+  auto links = parser->get_url_metadata (test_url)->_links;
 
   test_links_are_extracted_correctly (links);
   test_links_are_normalised (links);
-  test_page_title (parser, file_contents_str);
+  test_page_title (parser, test_url);
 
   return EXIT_SUCCESS;
 }

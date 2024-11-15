@@ -80,17 +80,19 @@ stupid mistake
 
 ** DONE ignore pdfs
 ** DONE ignore /login/ pages because you can't login anyways, there's nothing to see there
+** TODO refactor stuff noticed in comments
+** TODO improve tests
 ** TODO can i do something regarding mem usage? for example, if you hit > 1gb usage, stop, or allocate upfront
 ** TODO profile binary and see where you can improve
 ** DONE instead of using set, consider using unordered_set. you don't need ordering, only lookups.
 note: make sure there isn't a significant number of collisions when changing to unordered_set
 ** TODO what about using a trie data structure for doing prefix search? is it even worth?
 ** TODO handle signals
-** TODO refactor stuff noticed in comments
 ** TODO add multi-threading, since that's what this project was for, look for optimisation opportunities
 don't forget to analyse this part and store the information somewhere because you will need it
 ** TODO do at least one integration test with a known URL to ensure that something's working lol
 ** TODO write better readme, with how-to compile, run, etc
 ** TODO change every initialisation to use curly brackets instead
 ** TODO store info in a text file
+** TODO try static polymorphism instead of dynamic
 ** IDEA Implement persistence to save the state of visited URLs between sessions.

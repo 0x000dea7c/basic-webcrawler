@@ -7,6 +7,7 @@
 #include <vector>
 #include <thread>
 #include "robots_parser.hh"
+#include <unordered_set>
 
 class crawler final
 {
@@ -23,8 +24,6 @@ public:
   void run ();
 
 private:
-  std::string extract_domain (std::string const &url) const;
-
   void process_robots_file (std::string const &url);
 
   bool is_prefix (std::string const &prefix, std::string const &str) const

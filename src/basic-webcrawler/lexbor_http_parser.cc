@@ -2,44 +2,58 @@
 #include <cassert>
 #include <iostream>
 #include <cstring>
+#include "common.hh"
 
 using namespace std::string_literals;
 
-// TODO: do i need to do this per instance? idk how it works
-lexbor_http_parser::lexbor_http_parser () : _document{lxb_html_document_create ()} { assert (_document); }
+lexbor_http_parser::lexbor_http_parser () : _metadata{}, _document{lxb_html_document_create ()} { assert (_document); }
 
 lexbor_http_parser::~lexbor_http_parser () { lxb_html_document_destroy (_document); }
 
-std::unordered_set<std::string>
-lexbor_http_parser::extract_links (std::string const &contents, std::string const &domain)
+void
+lexbor_http_parser::parse (std::string const &url, std::string const &contents)
 {
   assert (!contents.empty ());
+  assert (_metadata.count (url) == 0);
 
-  std::unordered_set<std::string> links;
+  _metadata[url] = std::make_unique<url_metadata> ();
 
   auto status = lxb_html_document_parse (_document, (lxb_char_t const *) contents.c_str (), contents.length ());
+
   if (status != LXB_STATUS_OK)
     {
       std::cerr << "failed to parse html document\n";
-      return links;
+      return;
     }
 
   auto *root = lxb_dom_interface_element (_document->body);
+
   if (!root)
     {
       std::cerr << "couldn't get root dom element.\n";
-      return links;
+      return;
     }
 
-  auto protocol = get_protocol (domain);
+  {
+    // get the title
+    size_t title_len = 0;
+    auto *lxb_title = lxb_html_document_title (_document, &title_len);
+    if (lxb_title)
+      {
+        _metadata[url]->_title = std::string ((char const *) lxb_title);
+      }
+  }
 
-  extract (lxb_dom_interface_node (root), links, domain, protocol);
-
-  return links;
+  {
+    // get links
+    auto domain = get_domain (url);
+    auto protocol = get_protocol (domain);
+    extract (lxb_dom_interface_node (root), url, domain, protocol);
+  }
 }
 
 void
-lexbor_http_parser::extract (lxb_dom_node_t *node, std::unordered_set<std::string> &links, std::string const &domain,
+lexbor_http_parser::extract (lxb_dom_node_t *node, std::string const &url, std::string const &domain,
                              std::string const &protocol)
 {
   // REVIEW: refactor this crap
@@ -107,7 +121,7 @@ lexbor_http_parser::extract (lxb_dom_node_t *node, std::unordered_set<std::strin
                                   link_str.pop_back ();
                                 }
 
-                              links.emplace (link_str);
+                              _metadata[url]->_links.emplace (link_str);
                             }
                         }
                     }
@@ -115,44 +129,7 @@ lexbor_http_parser::extract (lxb_dom_node_t *node, std::unordered_set<std::strin
             }
         }
 
-      extract (node->first_child, links, domain, protocol);
+      extract (node->first_child, url, domain, protocol);
       node = node->next;
     }
-}
-
-// TODO: this shit can be optimised: the caller is doing two calls, extract_links and this one, and both need to parse
-// the same document, so you're doing useless work. it'd be better to only parse the file once and then do whatever
-// i need to do.
-std::string
-lexbor_http_parser::get_page_title (std::string const &contents)
-{
-  std::string title;
-
-  auto status = lxb_html_document_parse (_document, (lxb_char_t const *) contents.c_str (), contents.length ());
-  if (status != LXB_STATUS_OK)
-    {
-      std::cerr << "failed to parse html document\n";
-      return title;
-    }
-
-  auto *root = lxb_dom_interface_element (_document->body);
-  if (!root)
-    {
-      std::cerr << "couldn't get root dom element.\n";
-      return title;
-    }
-
-  size_t title_len = 0;
-
-  auto *lxb_title = lxb_html_document_title (_document, &title_len);
-  if (!lxb_title)
-    {
-      std::cerr << "couldn't get document title.\n";
-    }
-  else
-    {
-      title = std::string ((char const *) lxb_title);
-    }
-
-  return title;
 }

@@ -217,7 +217,7 @@ crawler::is_allowed (std::string const &link)
 }
 
 void
-crawler::process_link (std::pair<std::string, size_t> link,
+crawler::process_link (std::pair<std::string, uint32_t> link,
                        std::unique_ptr<http_client> &http_client,
                        std::unique_ptr<http_parser> &http_parser)
 {

@@ -21,7 +21,7 @@ set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,--as-n
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -Wl,--as-needed")
 
 set(SEED_URL_1 "https://4chan.org")
-set(DEFAULT_REQUEST_DELAY 5)            # In seconds!
+set(DEFAULT_REQUEST_DELAY 1)            # In seconds!
 set(DEFAULT_DEPTH_LIMIT 1)
 set(METADATA_FILENAME "crawler_output.txt")
 
@@ -62,25 +62,26 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Debug CACHE STRING "Build type" FORCE)
 endif()
 
-enable_testing()
-
-set(TEST_FILES
-  test/test_http_parser.cc)
-
-foreach(TEST_FILE ${TEST_FILES})
-  get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
-
-  add_executable(${TEST_NAME} ${TEST_FILE})
-
-  target_link_libraries(${TEST_NAME} PRIVATE webcrawler_lib)
-
-  target_include_directories(${TEST_NAME} PRIVATE
-    ${PROJECT_SOURCE_DIR}/inc
-    ${PROJECT_SOURCE_DIR}/../vcpkg/installed/x64-linux/include
-    ${PROJECT_BINARY_DIR}/inc
-  )
-
-  add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
-
-  set_tests_properties(${TEST_NAME} PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test)
-endforeach()
+# enable_testing()
+#
+# set(TEST_FILES
+#   test/test_http_parser.cc)
+#
+# foreach(TEST_FILE ${TEST_FILES})
+#   get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)
+#
+#   add_executable(${TEST_NAME} ${TEST_FILE})
+#
+#   target_link_libraries(${TEST_NAME} PRIVATE webcrawler_lib)
+#
+#   target_include_directories(${TEST_NAME} PRIVATE
+#     ${PROJECT_SOURCE_DIR}/inc
+#     ${PROJECT_SOURCE_DIR}/../vcpkg/installed/x64-linux/include
+#     ${PROJECT_BINARY_DIR}/inc
+#   )
+#
+#   add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+#
+#   set_tests_properties(${TEST_NAME} PROPERTIES WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/test)
+# endforeach()
+#

@@ -9,10 +9,6 @@ struct http_parsed_data final
     : _links{},
       _title{}
   {}
-  http_parsed_data (http_parsed_data &&other)
-    : _links{std::move (other._links)},
-      _title{std::move (other._title)}
-  {}
   std::unordered_set<std::string> _links;
   std::string _title;
 };

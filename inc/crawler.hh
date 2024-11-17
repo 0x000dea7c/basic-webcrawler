@@ -59,7 +59,7 @@ private:
 
   void process_robots_file (std::string const &domain, std::unique_ptr<http_client> &http_client);
 
-  void process_link (std::pair<std::string, size_t> link,
+  void process_link (std::pair<std::string, uint32_t> link,
                      std::unique_ptr<http_client> &http_client,
                      std::unique_ptr<http_parser> &http_parser);
 

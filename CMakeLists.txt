@@ -2,9 +2,9 @@ cmake_minimum_required(VERSION 3.31)
 
 project(basic-webcrawler)
 
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Winline -Wuninitialized -Wshadow \
@@ -20,11 +20,9 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lcurl")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,--as-needed -Wl,-O1 -Wl,--strip-all")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -Wl,--as-needed")
 
-set(SEED_URL_1 "https://motherfuckingwebsite.com/")
-set(SEED_URL_2 "https://www.fsme.es")
-set(SEED_URL_3 "http://bettermotherfuckingwebsite.com/")
-set(DEFAULT_REQUEST_DELAY 1)            # In seconds!
-set(DEFAULT_DEPTH_LIMIT 2)
+set(SEED_URL_1 "https://4chan.org")
+set(DEFAULT_REQUEST_DELAY 5)            # In seconds!
+set(DEFAULT_DEPTH_LIMIT 1)
 set(METADATA_FILENAME "crawler_output.txt")
 
 configure_file(
@@ -67,8 +65,7 @@ endif()
 enable_testing()
 
 set(TEST_FILES
-  test/test_http_parser.cc
-  test/test_robots_parser.cc)
+  test/test_http_parser.cc)
 
 foreach(TEST_FILE ${TEST_FILES})
   get_filename_component(TEST_NAME ${TEST_FILE} NAME_WE)

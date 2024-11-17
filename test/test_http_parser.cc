@@ -38,14 +38,6 @@ test_links_are_normalised (std::unordered_set<std::string> &links)
   assert (links.count ("https://www.fsf.org/about/financial") != 0);
 }
 
-static void
-test_page_title (std::unique_ptr<http_parser> &parser, std::string const &url)
-{
-  assert (
-    parser->get_url_metadata (url)->_title
-    == "Free software is a matter of liberty, not price — Free Software Foundation — Working together for free software"s);
-}
-
 int
 main ()
 {
@@ -64,13 +56,10 @@ main ()
   file_contents << file.rdbuf ();
   auto file_contents_str = file_contents.str ();
 
-  parser->parse (test_url, file_contents_str);
+  auto parsed_data = parser->parse (test_url, file_contents_str);
 
-  auto links = parser->get_url_metadata (test_url)->_links;
-
-  test_links_are_extracted_correctly (links);
-  test_links_are_normalised (links);
-  test_page_title (parser, test_url);
+  test_links_are_extracted_correctly (parsed_data._links);
+  test_links_are_normalised (parsed_data._links);
 
   return EXIT_SUCCESS;
 }

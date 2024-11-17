@@ -1,20 +1,17 @@
 #include "curl_http_client.hh"
 #include <curl/curl.h>
-#include <stdexcept>
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <cassert>
 
 using namespace std::string_literals;
 
-curl_http_client::curl_http_client () : _curl{nullptr}
+curl_http_client::curl_http_client ()
+  : _curl{nullptr}
 {
   _curl = curl_easy_init ();
-
-  if (!_curl)
-    {
-      throw std::runtime_error ("couldn't initialise CURL\n"s);
-    }
+  assert (_curl && "couldn't initialise CURL\n");
 }
 
 curl_http_client::~curl_http_client () { curl_easy_cleanup (_curl); }
@@ -26,15 +23,16 @@ curl_http_client::get (std::string const &url)
   std::string buffer;
   size_t tries{0};
   bool done{false};
-
   curl_easy_setopt (_curl, CURLOPT_URL, url.c_str ());
   curl_easy_setopt (_curl, CURLOPT_WRITEFUNCTION, curl_http_client::write_callback);
   curl_easy_setopt (_curl, CURLOPT_WRITEDATA, &buffer);
-  curl_easy_setopt (_curl, CURLOPT_USERAGENT,
+  curl_easy_setopt (_curl,
+                    CURLOPT_USERAGENT,
                     "Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) "
                     "Mobile/15E148");                  // crap is needed to avoid 403 forbidden errors
   curl_easy_setopt (_curl, CURLOPT_FOLLOWLOCATION, 1); // follow redirects
-
+  curl_easy_setopt (_curl, CURLOPT_LOCALPORT, 64000);
+  curl_easy_setopt (_curl, CURLOPT_LOCALPORTRANGE, 100);
   while (!done && tries < max_tries)
     {
       if (tries > 0)
@@ -42,31 +40,26 @@ curl_http_client::get (std::string const &url)
           std::this_thread::sleep_for (std::chrono::seconds (1));
           buffer.clear ();
         }
-
       auto code = curl_easy_perform (_curl);
-
       if (code != CURLE_OK)
         {
           std::cerr << "couldn't perform http request to URL " << url << " because: " << curl_easy_strerror (code)
                     << '\n';
-
           if (code == CURLE_COULDNT_CONNECT || code == CURLE_OPERATION_TIMEDOUT)
             {
-              continue;
+              return std::nullopt;
             }
           else
             {
               return std::nullopt;
             }
         }
-
       long http_code{0};
       curl_easy_getinfo (_curl, CURLINFO_RESPONSE_CODE, &http_code);
-
       switch (http_code)
         {
         case 200:
-          return buffer; // NOTE: early exit, this is not so clear
+          return buffer;
         case 301:
         case 302:
         case 303:
@@ -101,7 +94,6 @@ curl_http_client::get (std::string const &url)
           done = true;
           break;
         }
-
       ++tries;
     }
 

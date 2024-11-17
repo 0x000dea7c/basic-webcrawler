@@ -2,115 +2,46 @@
 
 The goal of this mini project is to learn the basics of multi-threading.
 
-* Information
+* Features
 
-- I'm not allowed to go outside the domains that I specified in the `seeds` variable.
-- Respect robots.txt file.
+- Respects robots.txt file.
 - Use delays between requests to not be annoying. Default value of 1 second between requests, but prefer delay specified in robots.txt.
-- Use persistence to avoid reprocessing URLs if the program is interrupted.
+- Multi-threaded.
+- Configurable parameters in `CMakeLists`:
+  - SEED_URL_1: specifies initial URL to start crawling.
+  - DEFAULT_REQUEST_DELAY: specifies the delay in seconds between requests to the same domain.
+  - DEFAULT_DEPTH_LIMIT: specifies the depth of the current search.
+  - METADATA_FILENAME: specifies the name of the file where the program will dump its output on.
+- Avoids doing requests to useless links like pdfs, jpgs, pngs, login/auth pages, embedded javascript, etc.
 
-* TASKS
+* Dependencies
 
-this is the task list because without it i lose all motivation and feel depressed:
+- cmake
+- c++ compiler with c++17 support
+- vcpkg
+- lexbor library (for http parsing)
+- curl library (for http requests)
 
-*** DONE add clang-for mat using GNU coding style
-*** DONE fix CMakeLists.txt to add compile-commands.json file
-*** DONE make sure clangd is picking things up correctly
-*** DONE create config file to define initial seed urls
-*** DONE handle http responses, status codes and redirects
-*** DONE before doing anything, perform requests to initial domains and grab their robots.txt, parse it
-*** DONE parse HTML using a lib or something, extract hyperlinks
-*** DONE when parsing links, need to get rid of the last "/" to differentiate links
-*** DONE create crawler class, inject dependencies and unit test functions
-*** DONE when extracting links, do not process links that start with '#'.
-*** DONE create a queue to store URLs to be crawled, use the bfs algorithm; the queue should not contain dups
-*** DONE remember bfs needs a container to see if you already visited a URL or not
-*** DONE links that start with '/' are within the same domain, construct them
+I still don't know how to use vcpkg effectively so I can't provide a good tutorial on how to do install dependencies using it, but the way I did it was:
 
-it's partially done, need to do this also while crawling
+1. Create a directory (parent of this project) called vcpkg.
+2. Install vcpkg there.
+3. Use vcpkg to manually install lexbor and curl.
+4. Then, in `compile.sh`, use this flag: `-DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake`.
+5. Notice that inside `CMakeLists.txt` there are also references to this directory. This is not ideal, but lexbor didn't provide a cmake integration so couldn't do anything about it.
 
-*** DONE test that shit
-*** DONE now, before crawling to an specific URL, check if it's allowed based on its robots.txt
-*** DONE normalise extracted URLs (resolve relative URLs to absolute) i think it's done
-think about subdomains too, like en.wikipedia.org and wikipedia.org... i don't think i need to normalise those, i mean, they're different pages in the end? maybe not, im stupid so... later
+* Notes
 
-*** DONE after normalising them, make sure they are still allowed
-*** NO i think i need to split the info of a url into protocol + domain at least, because links that start with // require them
-*** DONE extract page title from each web you visit (just to store something, idk)
-*** DONE introduce delays between requests (same domain)
-maybe in robots.txt there's something about this? or just add it to the config file
-*** DONE handle http errors gracefully
-for now it's printing to stderr
-*** DONE retry requests, with limits
-*** DONE add depth limit
-*** DONE debugger: step through line by line to notice mistakes/redudant stuff
-*** DONE improve http parsing
-visited URL https://www.google.com/products, page title: Google Shopping - Shop Online, Compare Prices & Where to Buy
-couldn't perform http request to URL products/robots.txt because: Could not resolve hostname
-couldn't perform http request to URL products because: Could not resolve hostname
-visited URL https://www.blog.google, page title: The Keyword | Google Product and Technology News and Stories
-couldn't perform http request to URL stories/robots.txt because: Could not resolve hostname
-couldn't perform http request to URL stories because: Could not resolve hostname
+There's a lot of room for improvement. This is just a very basic example of me learning the basics of multi-threading.
 
-visited URL https://safety.google/principles?hl=en_US, page title: Privacy Principles - Google Safety Center
-couldn't perform http request to URL privacy?hl=en-US/robots.txt because: Could not resolve hostname
-couldn't perform http request to URL privacy?hl=en-US because: Could not resolve hostname
-couldn't perform http request to URL terms?hl=en-US/robots.txt because: Could not resolve hostname
-couldn't perform http request to URL terms?hl=en-US because: Could not resolve hostname
-couldn't perform http request to URL faq?hl=en-US/robots.txt because: Could not resolve hostname
-couldn't perform http request to URL faq?hl=en-US because: Could not resolve hostname
-couldn't perform http request to URL technologies?hl=en-US/robots.txt because: Could not resolve hostname
-couldn't perform http request to URL technologies?hl=en-US because: Could not resolve hostname
+I didn't consider serious stuff like load-balancing, lock-free data structures, and so on. There's probably a lot of contention.
 
-visited URL https://about.google, page title: Google - Sobre nosotros
-visited URL https://www.google.com, page title: Google
-couldn't perform http request to URL technologies/product-privacy?hl=en-US/robots.txt because: Could not resolve hostname
-couldn't perform http request to URL technologies/product-privacy?hl=en-US because: Could not resolve hostname
-url: https://policies.google.com/robots.txt not found
+Also, since the focus of this project was multi-threading, I didn't provide enough and serious tests (besides a basic one to know if I'm parsing links correctly). Ideally I'd want them. It'd be nice to also use a lib like GTest for more expressive tests with cmake integration.
 
-visited URL https://support.google.com/translate/answer/6142478?hl=en&ref_topic=7011659, page title: Translate written words - iPhone & iPad - Google Translate Help
-couldn't perform http request to URL about:invalid#zjslayoutz because: URL using bad/illegal format or missing URL
+* Compilation
 
+Run `compile.sh` and then `./build/basic-webcrawler`.
 
-*** DONE visited urls are not working correctly i think
+You'll get messages in stderr if there are any errors like timeouts to certain websites, couldn't access website, etc.
 
-in logs i see repeated urls being processed, i don't know if it has to do with not normalised links or something
-stupid mistake
-
-*** DONE ignore pdfs
-*** DONE ignore /login/ pages because you can't login anyways, there's nothing to see there
-*** DONE refactor stuff noticed in comments
-*** DONE store info in a text file
-*** DONE change every initialisation to use curly brackets instead
-*** DONE instead of using set, consider using unordered_set. you don't need ordering, only lookups.
-*** NO what about using a trie data structure for doing prefix search? is it even worth?
-*** DONE profile binary and see where you can improve
-note: make sure there isn't a significant number of collisions when changing to unordered_set
-
-the output of gprof looks reasonable: the top two most used functions are std::operator== from the red-black tree implementations of std containers and lxb_html_tokenizer_state_attribute_value_double_quoted. both align with the fact that i'm doing a lot of links look-ups and html parsing. between the two, they take 20.68% of the time.
-
-the next 3 functions take 6.90% of the time, and are: std::min, aligned_membuf, and _init (no idea what that is). the algined membuf comes from std::basic_string, so perhaps i'm not managing strings correctly. need to look that up.
-
-the rest of time percentages are reasonable, but most of them come from operations related to strings... something's up.
-
-regarding functions execution time, they look fine: cumulative seconds doesn't exceed 0.3, and max. self seconds is 0.03, so i think it's reasonable.
-
-line 81 -> operator new (unsigned long, void*) -> 60'333 calls... that is sus... wth does that come from?
-
-179.97ms/call on crawler::run()... i'm doing i/o per line (not really, it's buffered i/o, but... if i change the buffer size so that it flushes less frequently... i wonder...)
-
-oh! changed the buffer to 8Kb reduced that time to 119.91ms... now the _init function appears at the top, but turns out that crap is (apparently) shared library loading time...
-
-note for future self: this is my first time reading gprof's output... don't hate yourself too much, please
-
-** TODO add multi-threading, since that's what this project was for, look for optimisation opportunities
-** TODO can i do something regarding mem usage? for example, if you hit > 1gb usage, stop, or allocate upfront
-** TODO write better readme, with how-to compile, run, etc
-** IDEA analyse cache misses and memory fragmentation
-i know i can use valgrind for cache misses, but i've no idea about memory fragmentation... figure this shit out eventually!
-** IDEA try static polymorphism instead of dynamic
-** IDEA Implement persistence to save the state of visited URLs between sessions, tied to signals
-** IDEA handle signals
-it's not the point of this project, but it'd be nice
-** HOLD improve tests
-it works for now, which is enough, the point of this project isn't testing anyways
+For every successful website processed, you'll have an entry on `METADATA_FILENAME`.

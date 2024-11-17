@@ -28,8 +28,9 @@
 Language: Cpp
 AccessModifierOffset: -2
 AlwaysBreakAfterReturnType: TopLevel
-BinPackArguments: true
-BinPackParameters: true
+BinPackArguments: false
+BinPackParameters: false
+PackConstructorInitializers: Never
 BraceWrapping:
   AfterClass: true
   AfterControlStatement: true

@@ -22,11 +22,11 @@ The goal of this mini project is to learn the basics of multi-threading.
 -   Respects robots.txt file.
 -   Use delays between requests to not be annoying. Default value of 1 second between requests, but prefer delay specified in robots.txt.
 -   Multi-threaded.
--   Configurable parameters in \`CMakeLists\`:
-    -   SEED<sub>URL</sub><sub>1</sub>: specifies initial URL to start crawling.
-    -   DEFAULT<sub>REQUEST</sub><sub>DELAY</sub>: specifies the delay in seconds between requests to the same domain.
-    -   DEFAULT<sub>DEPTH</sub><sub>LIMIT</sub>: specifies the depth of the current search.
-    -   METADATA<sub>FILENAME</sub>: specifies the name of the file where the program will dump its output on.
+-   Configurable parameters in `CMakeLists`:
+    -   `SEED_URL_1`: specifies initial URL to start crawling.
+    -   `DEFAULT_REQUEST_DELAY_`: specifies the delay in seconds between requests to the same domain.
+    -   `DEFAULT_DEPTH_LIMIT`: specifies the depth of the current search.
+    -   `METADATA_FILENAME`: specifies the name of the file where the program will dump its output on.
 -   Avoids doing requests to useless links like pdfs, jpgs, pngs, login/auth pages, embedded javascript, etc.
 
 
@@ -45,8 +45,8 @@ I still don&rsquo;t know how to use vcpkg effectively so I can&rsquo;t provide a
 1.  Create a directory (parent of this project) called vcpkg.
 2.  Install vcpkg there.
 3.  Use vcpkg to manually install lexbor and curl.
-4.  Then, in \`compile.sh\`, use this flag: \`-DCMAKE<sub>TOOLCHAIN</sub><sub>FILE</sub>=../vcpkg/scripts/buildsystems/vcpkg.cmake\`.
-5.  Notice that inside \`CMakeLists.txt\` there are also references to this directory. This is not ideal, but lexbor didn&rsquo;t provide a cmake integration so couldn&rsquo;t do anything about it.
+4.  Then, in `compile.sh`, use this flag: `-DCMAKE_TOOLCHAIN_FILE=../vcpkg/scripts/buildsystems/vcpkg.cmake`.
+5.  Notice that inside `CMakeLists.txt` there are also references to this directory. This is not ideal, but lexbor didn&rsquo;t provide a cmake integration so couldn&rsquo;t do anything about it.
 
 
 <a id="org8407628"></a>
@@ -57,16 +57,16 @@ There&rsquo;s a lot of room for improvement. This is just a very basic example o
 
 I didn&rsquo;t consider serious stuff like load-balancing, lock-free data structures, and so on. There&rsquo;s probably a lot of contention.
 
-Also, since the focus of this project was multi-threading, I didn&rsquo;t provide enough and serious tests (besides a basic one to know if I&rsquo;m parsing links correctly). Ideally I&rsquo;d want them. It&rsquo;d be nice to also use a lib like GTest for more expressive tests with cmake integration.
+Also, because of the focus of this project, I didn&rsquo;t provide enough and serious tests (besides a basic one to know if I&rsquo;m parsing links correctly). Ideally I&rsquo;d want them. It&rsquo;d be nice to also use a lib like GTest for more expressive tests with cmake integration.
 
 
 <a id="org54850bc"></a>
 
 # Compilation
 
-Run \`compile.sh\` and then \`./build/basic-webcrawler\`.
+Run `compile.sh` and then `./build/basic-webcrawler`.
 
 You&rsquo;ll get messages in stderr if there are any errors like timeouts to certain websites, couldn&rsquo;t access website, etc.
 
-For every successful website processed, you&rsquo;ll have an entry on \`METADATA<sub>FILENAME</sub>\`.
+For every successful website processed, you&rsquo;ll have an entry on `METADATA_FILENAME`.
 

@@ -20,7 +20,7 @@ set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -lcurl")
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -Wl,--as-needed -Wl,-O1 -Wl,--strip-all")
 set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -Wl,--as-needed")
 
-set(SEED_URL_1 "https://4chan.org")
+set(SEED_URL_1 "https://www.microsoft.com/es-es/")
 set(DEFAULT_REQUEST_DELAY 1)            # In seconds!
 set(DEFAULT_DEPTH_LIMIT 1)
 set(METADATA_FILENAME "crawler_output.txt")
